@@ -1,0 +1,17 @@
+- name: pull prom container
+  podman_image:
+    name: prom/prometheus
+    tag: latest
+    state: present
+
+- name: run prometheus
+  podman_container:
+    name: prometheus
+    image: prom/prometheus:latest
+    state: started
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - /opt/observability/prometheus:/prometheus
+

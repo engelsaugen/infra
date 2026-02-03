@@ -1,0 +1,9 @@
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+  console.log("Ping received");
+  res.end("works");
+});
+
+server.listen(8080, () => console.log("Running on 8080"));
+

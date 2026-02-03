@@ -1,0 +1,5 @@
+- name: install kubernetes CLI tools
+  apt:
+    name:
+      - kubectl
+    state: present

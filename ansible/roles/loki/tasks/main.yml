@@ -1,0 +1,17 @@
+- name: Pull Loki image
+  podman_image:
+    name: grafana/loki
+    tag: latest
+    state: present
+
+- name: run loki container
+  podman_container:
+    name: loki
+    image: grafana/loki:latest
+    state: started
+    restart: always
+    ports:
+      - "3100:3100"
+    volumes:
+      - /opt/observability/loki:/loki
+

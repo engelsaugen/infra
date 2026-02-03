@@ -1,0 +1,11 @@
+- name: Bootstrap a local node for dev operations
+  hosts: localhost
+  become: true
+  roles:
+    - common
+    - podman
+    - kube-tools
+    - observability-dirs
+    - grafana
+    - prometheus
+    - loki

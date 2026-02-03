@@ -1,0 +1,5 @@
+#test podman. Is it a connection issue? Does the access token work?
+
+podman login ghcr.io -u engelsaugen -p <NEW_PAT>
+podman pull ghcr.io/engelsaugen/asd-app:<tag>
+

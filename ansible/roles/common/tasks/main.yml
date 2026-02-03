@@ -1,0 +1,11 @@
+- name: make sure basic packages are installed
+  apt:
+    name:
+      - curl
+      - wget
+      - ca-certificates
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: true
+

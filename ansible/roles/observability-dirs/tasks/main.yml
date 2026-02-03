@@ -1,0 +1,24 @@
+- name: Create base observability directory
+  file:
+    path: /opt/observability
+    state: directory
+    mode: '0755'
+
+- name: Create Prometheus data dir
+  file:
+    path: /opt/observability/prometheus
+    state: directory
+    mode: '0777'
+
+- name: Create Grafana data dir
+  file:
+    path: /opt/observability/grafana
+    state: directory
+    mode: '0777'
+
+- name: Create Loki data dir
+  file:
+    path: /opt/observability/loki
+    state: directory
+    mode: '0777'
+
