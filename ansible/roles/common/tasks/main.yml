@@ -1,3 +1,9 @@
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
 - name: make sure basic packages are installed
   apt:
     name:
@@ -6,6 +12,25 @@
       - ca-certificates
       - gnupg
       - lsb-release
+      - apt-transport-http
     state: present
     update_cache: true
+
+ - name: Remove swap from fstab (persistent)
+  ansible.posix.mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  loop: ["none", "swap"]
+  become: true
+
+- name: Set net.ipv4.ip_forward to 1
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: true
+  become: true
+
+ 
 
