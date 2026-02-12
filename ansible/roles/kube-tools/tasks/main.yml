@@ -2,6 +2,7 @@
   ansible.builtin.get_url:
     url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
     dest: /usr/local/bin/kubectl
+    force: no
     mode: '0755'
     owner: root
     group: root
@@ -12,6 +13,9 @@
     src: "https://get.helm.sh{{ helm_version }}-linux-amd64.tar.gz"
     dest: /tmp
     remote_src: yes
+    creates: "/usr/local/bin/helm"  
+    extra_opts: [--strip-components=1]
+  become: true
   become: true
 
 - name: put helm binary into bin so it becomes usable too
@@ -24,3 +28,4 @@
 
 
   #kube & helm both wait for their version variables to be populated in kube-tools/defaults/main.yml
+  #hopefully the force:no will serve the same function as what im doing below for helm - not reinstall what already exists
