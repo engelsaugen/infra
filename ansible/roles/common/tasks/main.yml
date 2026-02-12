@@ -39,5 +39,22 @@
     reload: true
   become: true
 
+- name: Enable lingering for the user
+  ansible.builtin.command: "loginctl enable-linger {{ podman_user }}"
+  args:
+    creates: "/var/lib/systemd/linger/{{ podman_user }}"
+  become: true
+
+- name: Verify lingering is active
+  ansible.builtin.stat:
+    path: "/var/lib/systemd/linger/{{ podman_user }}"
+  register: linger_check
+
+- name: Error if lingering failed
+  ansible.builtin.fail:
+    msg: "Lingering was not enabled for {{ podman_user }}!"
+  when: not linger_check.stat.exists
+
+
  
 
