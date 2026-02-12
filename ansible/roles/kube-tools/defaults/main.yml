@@ -1,3 +1,2 @@
-#SPDX-License-Identifier: MIT-0
----
-# defaults file for roles/kube-tools
+kubectl_version: "v1.31.0" #specify whichever version you like the most
+helm_version: "v3.15.0" #or use latest
