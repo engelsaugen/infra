@@ -10,9 +10,27 @@
     state: directory
     mode: '0777'
 
+ - name: Create config subdir for prometheus
+  file:
+    path: /opt/observability/prometheus/config
+    state: directory
+    mode: '0777'
+
 - name: Create Grafana data dir
   file:
     path: /opt/observability/grafana
+    state: directory
+    mode: '0775'
+    
+- name: Create provisioning subdir for grafana
+  file:
+    path: /opt/observability/grafana/provisioning
+    state: directory
+    mode: '0777'
+
+- name: Create provisioning/datasources subdir for grafana
+  file:
+    path: /opt/observability/grafana/provisioning/datasources
     state: directory
     mode: '0777'
 
@@ -20,5 +38,5 @@
   file:
     path: /opt/observability/loki
     state: directory
-    mode: '0777'
+    mode: '0775'
 
