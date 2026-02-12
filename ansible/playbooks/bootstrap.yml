@@ -1,8 +1,8 @@
 - name: Bootstrap a local node for dev operations
-vars:
-  podman_user: "podman_user" #populate. For the common role task
   hosts: localhost
   become: true
+  vars:
+    podman_user: "podman_user" #populate. For the common role task
   roles:
     - common
     - podman
