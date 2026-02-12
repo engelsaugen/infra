@@ -1,5 +1,26 @@
-- name: install kubernetes CLI tools
-  apt:
-    name:
-      - kubectl
-    state: present
+- name: download kubectl tools
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+
+- name: download, unarchive helm
+  ansible.builtin.unarchive:
+    src: "https://get.helm.sh{{ helm_version }}-linux-amd64.tar.gz"
+    dest: /tmp
+    remote_src: yes
+  become: true
+
+- name: put helm binary into bin so it becomes usable too
+  ansible.builtin.copy:
+    src: /tmp/linux-amd64/helm
+    dest: /usr/local/bin/helm
+    mode: '0755'
+    remote_src: yes
+  become: true
+
+
+  #kube & helm both wait for their version variables to be populated in kube-tools/defaults/main.yml
