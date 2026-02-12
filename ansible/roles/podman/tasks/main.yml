@@ -1,9 +1,9 @@
-- name: Install podman
-  apt:
+- name: Install Podman
+  ansible.builtin.package:
     name: podman
     state: present
-
-
+  become: true
+  
 - name: Ensure podman service dirs exist
   file:
     path: /etc/containers
