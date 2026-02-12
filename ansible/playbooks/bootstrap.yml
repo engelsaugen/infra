@@ -1,4 +1,6 @@
 - name: Bootstrap a local node for dev operations
+vars:
+  podman_user: "podman_user"
   hosts: localhost
   become: true
   roles:
