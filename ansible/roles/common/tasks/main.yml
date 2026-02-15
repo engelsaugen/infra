@@ -22,14 +22,25 @@
       - apt-transport-http
     state: present
     update_cache: true
-
- - name: Remove swap from fstab (persistent)
-  ansible.posix.mount:
-    name: "{{ item }}"
-    fstype: swap
-    state: absent
-  loop: ["none", "swap"]
+    
+- name: Disable swap immediately
+  command: swapoff -a #caveman off switch
+  when: ansible_swaptotal_mb > 0 #mechanism to not run it all the time
   become: true
+  
+# - name: Remove swap from fstab
+#  ansible.posix.mount:
+#    name: "{{ item }}"
+#    fstype: swap
+#    state: absent
+#  loop: ["none", "swap"]
+#  become: true #replacing this task with a move cavemanish sed task that comments it out using sed 
+
+- name: Remove swap from fstab
+  replace:
+    path: /etc/fstab
+    regexp: '^\S+\s+\S+\s+swap\s+.*$'
+    replace: '# \g<0>'
 
 - name: Set net.ipv4.ip_forward to 1
   ansible.posix.sysctl:
