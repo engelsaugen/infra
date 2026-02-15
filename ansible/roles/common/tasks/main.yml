@@ -1,10 +1,3 @@
-- name: Create a podman user if they don't exist (needs a vars: podman_user: "podman_user" in the playbook)
-  ansible.builtin.user:
-    name: "{{ podman_user }}"
-    shell: /bin/bash
-    state: present
-  become: true
-
 - name: Update apt cache
   ansible.builtin.apt:
     update_cache: true
