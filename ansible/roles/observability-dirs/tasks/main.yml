@@ -3,40 +3,54 @@
     path: /opt/observability
     state: directory
     mode: '0755'
+    owner: root
+    group: root
 
 - name: Create Prometheus data dir
   file:
     path: /opt/observability/prometheus
     state: directory
-    mode: '0777'
+    mode: '0755'
+    owner: root
+    group: root
 
  - name: Create config subdir for prometheus
   file:
     path: /opt/observability/prometheus/config
     state: directory
-    mode: '0777'
+    mode: '0755'
+    owner: root
+    group: root
 
 - name: Create Grafana data dir
   file:
     path: /opt/observability/grafana
     state: directory
     mode: '0775'
+    owner: root
+    group: root
     
 - name: Create provisioning subdir for grafana
   file:
     path: /opt/observability/grafana/provisioning
     state: directory
-    mode: '0777'
+    mode: '0755'
+    owner: root
+    group: root
 
 - name: Create provisioning/datasources subdir for grafana
   file:
     path: /opt/observability/grafana/provisioning/datasources
     state: directory
-    mode: '0777'
+    mode: '0755'
+    owner: root
+    group: root
 
 - name: Create Loki data dir
   file:
     path: /opt/observability/loki
     state: directory
-    mode: '0775'
+    mode: '0755'
+    owner: root
+    group: root
 
