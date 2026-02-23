@@ -1,0 +1,3 @@
+podman_user: "{{ ansible_user | default('devops') }}"
+#so it doesnt break, after all, if one doesnt populate a user :)
+

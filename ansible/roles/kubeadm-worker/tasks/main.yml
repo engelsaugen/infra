@@ -1,0 +1,13 @@
+- name: install kubeadm and kubelet
+  ansible.builtin.apt:
+    name:
+      - kubelet
+      - kubeadm
+    state: present
+    update_cache: yes
+  become: true
+
+- name: join cluster
+  ansible.builtin.command: "{{ kubeadm_join_command }}"
+  when: kubeadm_join_command is defined
+  become: true

@@ -1,0 +1,2 @@
+kubectl_version: "v1.31.0" #specify whichever version you like the most
+helm_version: "v3.15.0" #or use latest

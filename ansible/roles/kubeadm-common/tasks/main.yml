@@ -1,0 +1,52 @@
+- name: disable swap (kubelet refuses to start with swap on)
+  ansible.builtin.command: swapoff -a # caveman off switch
+  when: ansible_swaptotal_mb > 0 # so it doesnt run if there is no swap anyway
+  become: true
+
+- name: comment out swap in fstab so it survives reboots
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^\S+\s+\S+\s+swap\s+.*$'
+    replace: '# \g<0>'
+#   replace: '# \g<1>' 
+  become: true
+
+- name: install kubernetes networking deps
+  ansible.builtin.apt:
+    name:
+      - conntrack       
+      - iptables           
+    state: present
+    update_cache: true      # missing dependencies mid-run = botch
+  become: true
+# overlapping task with common for paranoia purposes ^
+
+- name: load kernel modules on boot
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/k8s.conf
+    content: |
+      overlay     
+      br_netfilter
+    mode: '0664' #system stuff and i dont trust umask existing
+  become: true
+#the fs overlay needed for containers (read on the internet) and the networking glue
+
+- name: load the overlay module now (since the one above will need a restart)
+  community.general.modprobe:
+    name: overlay 
+    name: br_netfilter
+    state: present
+
+- name: apply sysctl params for kubernetes networking
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/k8s.conf
+    content: |
+      net.bridge.bridge-nf-call-iptables = 1 
+      net.ipv4.ip_forward = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+  become: true
+#calling the modules and setting to true so the host can start forwarding instead of dropping traffic
+
+- name: reload sysctl to apply changes
+  ansible.builtin.command: sysctl --system
+  become: true

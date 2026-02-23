@@ -1,0 +1,11 @@
+- name: install minikube package
+  ansible.builtin.apt:
+    deb: "https://storage.googleapis.com/minikube/releases/latest/minikube_latest_amd64.deb"
+    state: present
+  become: true
+
+- name: start minikube with podman driver
+  ansible.builtin.command: minikube start --driver=podman
+  args:
+    creates: "{{ ansible_env.HOME }}/.minikube"
+

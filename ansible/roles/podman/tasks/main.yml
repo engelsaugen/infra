@@ -1,0 +1,41 @@
+- name: install podman
+  ansible.builtin.apt:
+    name:
+      - podman
+      - uidmap
+      - slirp4netns
+      - fuse-overlayfs
+    state: present
+    update_cache: yes
+  become: true
+  
+- name: ensure the podman user exists
+  ansible.builtin.user:
+    name: "{{ podman_user }}" # variable is dependent on the var in the playbook
+    shell: /bin/bash
+    state: present
+  become: true
+  
+- name: Ensure podman service dirs exist
+  file:
+    path: /etc/containers
+    state: directory
+    mode: '0755'
+    
+#lie to podman that hes root:
+
+- name: configure subuid mapping
+  ansible.builtin.lineinfile:
+    path: /etc/subuid
+    line: "{{ podman_user }}:100000:65536"
+    create: yes
+  become: true
+
+#still relying on the var input in the playbook :P
+
+- name: configure subgid mapping
+  ansible.builtin.lineinfile:
+    path: /etc/subgid
+    line: "{{ podman_user }}:100000:65536"
+    create: yes
+  become: true

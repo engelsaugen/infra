@@ -1,0 +1,15 @@
+- name: install kubeadm, kubelet, kubectl
+  ansible.builtin.apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
+  become: true
+
+- name: initialize control plane
+  ansible.builtin.command: kubeadm init --pod-network-cidr=192.168.0.0/16
+  args:
+    creates: /etc/kubernetes/admin.conf
+  become: true

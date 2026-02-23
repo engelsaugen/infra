@@ -1,0 +1,19 @@
+- name: Bootstrap a local node for dev operations
+  hosts: localhost
+  gather_facts: true #making it easier for myself in user creation
+  become: true
+  vars:
+    podman_user: "podman_user" #populate. For the common role task
+  roles:
+    - common
+    - kubeadm-common
+    - podman
+    - kube-tools
+    - minikube
+#   - kubeadm-common
+#   - kubeadm-master
+#   - kubeadm-worker
+    - observability-dirs
+    - grafana
+    - prometheus
+    - loki

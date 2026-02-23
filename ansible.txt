@@ -1,0 +1,504 @@
+ansible/roles/loki/tasks/main.yml
+
+===== FILE: ansible/roles/loki/tasks/main.yml =====
+- name: Pull Loki image
+  podman_image:
+    name: grafana/loki
+    tag: latest
+    state: present
+
+- name: run loki container
+  podman_container:
+    name: loki
+    image: grafana/loki:latest
+    state: started
+    restart: always
+    ports:
+      - "3100:3100"
+    volumes:
+      - /opt/observability/loki:/loki
+
+ansible/roles/kube-tools/tests/test.yml
+
+===== FILE: ansible/roles/kube-tools/tests/test.yml =====
+#SPDX-License-Identifier: MIT-0
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - roles/kube-tools
+ansible/roles/kube-tools/tests/inventory
+
+===== FILE: ansible/roles/kube-tools/tests/inventory =====
+#SPDX-License-Identifier: MIT-0
+localhost
+
+ansible/roles/kube-tools/README.md
+
+===== FILE: ansible/roles/kube-tools/README.md =====
+Role Name
+=========
+
+A brief description of the role goes here.
+
+Requirements
+------------
+
+Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+
+Role Variables
+--------------
+
+A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+
+Dependencies
+------------
+
+A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+
+Example Playbook
+----------------
+
+Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+
+    - hosts: servers
+      roles:
+         - { role: username.rolename, x: 42 }
+
+License
+-------
+
+BSD
+
+Author Information
+------------------
+
+An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+ansible/roles/kube-tools/vars/main.yml
+
+===== FILE: ansible/roles/kube-tools/vars/main.yml =====
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for roles/kube-tools
+ansible/roles/kube-tools/handlers/main.yml
+
+===== FILE: ansible/roles/kube-tools/handlers/main.yml =====
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for roles/kube-tools
+ansible/roles/kube-tools/tasks/main.yml
+
+===== FILE: ansible/roles/kube-tools/tasks/main.yml =====
+- name: download kubectl tools
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
+    force: no
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+
+- name: download, unarchive helm
+  ansible.builtin.unarchive:
+    src: "https://get.helm.sh{{ helm_version }}-linux-amd64.tar.gz"
+    dest: /tmp
+    remote_src: yes
+    creates: "/usr/local/bin/helm"  
+    extra_opts: [--strip-components=1]
+  become: true
+  become: true
+
+- name: put helm binary into bin so it becomes usable too
+  ansible.builtin.copy:
+    src: /tmp/linux-amd64/helm
+    dest: /usr/local/bin/helm
+    mode: '0755'
+    remote_src: yes
+  become: true
+
+
+  #kube & helm both wait for their version variables to be populated in kube-tools/defaults/main.yml
+  #hopefully the force:no will serve the same function as what im doing below for helm - not reinstall what already exists
+ansible/roles/kube-tools/defaults/main.yml
+
+===== FILE: ansible/roles/kube-tools/defaults/main.yml =====
+kubectl_version: "v1.31.0" #specify whichever version you like the most
+helm_version: "v3.15.0" #or use latest
+ansible/roles/kube-tools/meta/main.yml
+
+===== FILE: ansible/roles/kube-tools/meta/main.yml =====
+#SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: your name
+  description: your role description
+  company: your company (optional)
+
+  # If the issue tracker for your role is not on github, uncomment the
+  # next line and provide a value
+  # issue_tracker_url: http://example.com/issue/tracker
+
+  # Choose a valid license ID from https://spdx.org - some suggested licenses:
+  # - BSD-3-Clause (default)
+  # - MIT
+  # - GPL-2.0-or-later
+  # - GPL-3.0-only
+  # - Apache-2.0
+  # - CC-BY-4.0
+  license: license (GPL-2.0-or-later, MIT, etc)
+
+  min_ansible_version: 2.2
+
+  # If this a Container Enabled role, provide the minimum Ansible Container version.
+  # min_ansible_container_version:
+
+  galaxy_tags: []
+    # List tags for your role here, one per line. A tag is a keyword that describes
+    # and categorizes the role. Users find roles by searching for tags. Be sure to
+    # remove the '[]' above, if you add tags to this list.
+    #
+    # NOTE: A tag is limited to a single word comprised of alphanumeric characters.
+    #       Maximum 20 tags per role.
+
+dependencies: []
+  # List your role dependencies here, one per line. Be sure to remove the '[]' above,
+  # if you add dependencies to this list.
+ansible/roles/prometheus/tasks/main.yml
+
+===== FILE: ansible/roles/prometheus/tasks/main.yml =====
+- name: Pull Prometheus container
+  podman_image:
+    name: prom/prometheus
+    tag: latest
+    state: present
+
+- name: Run Prometheus
+  podman_container:
+    name: prometheus
+    image: prom/prometheus:latest
+    state: started
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - /opt/observability/prometheus:/prometheus
+
+ansible/roles/grafana/tasks/main.yml
+
+===== FILE: ansible/roles/grafana/tasks/main.yml =====
+- name: pull prom container
+  podman_image:
+    name: prom/prometheus
+    tag: latest
+    state: present
+
+- name: run prometheus
+  podman_container:
+    name: prometheus
+    image: prom/prometheus:latest
+    state: started
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - /opt/observability/prometheus:/prometheus
+
+ansible/roles/podman/tasks/main.yml
+
+===== FILE: ansible/roles/podman/tasks/main.yml =====
+- name: Install Podman
+  ansible.builtin.package:
+    name: podman
+    state: present
+  become: true
+  
+- name: Ensure the podman user exists
+  ansible.builtin.user:
+    name: "{{ podman_user }}" # variable is dependent on the var in the playbook
+    shell: /bin/bash
+    state: present
+  become: true
+  
+- name: Ensure podman service dirs exist
+  file:
+    path: /etc/containers
+    state: directory
+    mode: '0755'
+ansible/roles/common/tasks/main.yml
+
+===== FILE: ansible/roles/common/tasks/main.yml =====
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: make sure basic packages are installed
+  apt:
+    name:
+      - curl
+      - wget
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - software-properties-common
+      - socat #same as iptables. Needed by kube-proxy
+      - conntrack #again kube-proxy
+      - iptables #for kubernetes since it relies on iptables binaries
+ #     - apt-transport-http - #retro. Uncomment if you're retro
+ #     - apt-transport-https - #i.e Debian <10
+    state: present
+    update_cache: true #just to be safe
+    
+- name: Disable swap immediately
+  command: swapoff -a #caveman off switch
+  when: ansible_swaptotal_mb > 0 #mechanism to not run it all the time
+  become: true
+  
+# - name: Remove swap from fstab
+#  ansible.posix.mount:
+#    name: "{{ item }}"
+#    fstype: swap
+#    state: absent
+#  loop: ["none", "swap"]
+#  become: true #replacing this task with a move cavemanish sed task that comments it out using sed 
+
+- name: Remove swap from fstab
+  replace:
+    path: /etc/fstab
+    regexp: '^\S+\s+\S+\s+swap\s+.*$'
+    replace: '# \g<1>'
+
+- name: Set net.ipv4.ip_forward to 1
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: true
+  become: true
+  #  sysctl_file: /etc/sysctl.d/k8s.conf - add this location if you dont like the default (writes to /etc/sysctl.conf)
+
+- name: Enable lingering for the user #this is because of podman
+  ansible.builtin.command: "loginctl enable-linger {{ podman_user }}"
+  args:
+    creates: "/var/lib/systemd/linger/{{ podman_user }}"
+  become: true
+
+- name: Verify lingering is active
+  ansible.builtin.stat:
+    path: "/var/lib/systemd/linger/{{ podman_user }}"
+  register: linger_check
+
+- name: Error if lingering failed
+  ansible.builtin.fail:
+    msg: "Lingering was not enabled for {{ podman_user }}!"
+  when: not linger_check.stat.exists
+
+
+ 
+
+ansible/roles/observability-dirs/tests/test.yml
+
+===== FILE: ansible/roles/observability-dirs/tests/test.yml =====
+#SPDX-License-Identifier: MIT-0
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - roles/observability-dirs
+ansible/roles/observability-dirs/tests/inventory
+
+===== FILE: ansible/roles/observability-dirs/tests/inventory =====
+#SPDX-License-Identifier: MIT-0
+localhost
+
+ansible/roles/observability-dirs/README.md
+
+===== FILE: ansible/roles/observability-dirs/README.md =====
+Role Name
+=========
+
+A brief description of the role goes here.
+
+Requirements
+------------
+
+Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+
+Role Variables
+--------------
+
+A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+
+Dependencies
+------------
+
+A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+
+Example Playbook
+----------------
+
+Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+
+    - hosts: servers
+      roles:
+         - { role: username.rolename, x: 42 }
+
+License
+-------
+
+BSD
+
+Author Information
+------------------
+
+An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+ansible/roles/observability-dirs/vars/main.yml
+
+===== FILE: ansible/roles/observability-dirs/vars/main.yml =====
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for roles/observability-dirs
+ansible/roles/observability-dirs/handlers/main.yml
+
+===== FILE: ansible/roles/observability-dirs/handlers/main.yml =====
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for roles/observability-dirs
+ansible/roles/observability-dirs/tasks/main.yml
+
+===== FILE: ansible/roles/observability-dirs/tasks/main.yml =====
+- name: Create base observability directory
+  file:
+    path: /opt/observability
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create Prometheus data dir
+  file:
+    path: /opt/observability/prometheus
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+ - name: Create config subdir for prometheus
+  file:
+    path: /opt/observability/prometheus/config
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create Grafana data dir
+  file:
+    path: /opt/observability/grafana
+    state: directory
+    mode: '0775'
+    owner: root
+    group: root
+    
+- name: Create provisioning subdir for grafana
+  file:
+    path: /opt/observability/grafana/provisioning
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create provisioning/datasources subdir for grafana
+  file:
+    path: /opt/observability/grafana/provisioning/datasources
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create Loki data dir
+  file:
+    path: /opt/observability/loki
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+ansible/roles/observability-dirs/defaults/main.yml
+
+===== FILE: ansible/roles/observability-dirs/defaults/main.yml =====
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for roles/observability-dirs
+ansible/roles/observability-dirs/meta/main.yml
+
+===== FILE: ansible/roles/observability-dirs/meta/main.yml =====
+#SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: your name
+  description: your role description
+  company: your company (optional)
+
+  # If the issue tracker for your role is not on github, uncomment the
+  # next line and provide a value
+  # issue_tracker_url: http://example.com/issue/tracker
+
+  # Choose a valid license ID from https://spdx.org - some suggested licenses:
+  # - BSD-3-Clause (default)
+  # - MIT
+  # - GPL-2.0-or-later
+  # - GPL-3.0-only
+  # - Apache-2.0
+  # - CC-BY-4.0
+  license: license (GPL-2.0-or-later, MIT, etc)
+
+  min_ansible_version: 2.2
+
+  # If this a Container Enabled role, provide the minimum Ansible Container version.
+  # min_ansible_container_version:
+
+  galaxy_tags: []
+    # List tags for your role here, one per line. A tag is a keyword that describes
+    # and categorizes the role. Users find roles by searching for tags. Be sure to
+    # remove the '[]' above, if you add tags to this list.
+    #
+    # NOTE: A tag is limited to a single word comprised of alphanumeric characters.
+    #       Maximum 20 tags per role.
+
+dependencies: []
+  # List your role dependencies here, one per line. Be sure to remove the '[]' above,
+  # if you add dependencies to this list.
+ansible/ansible.cfg
+
+===== FILE: ansible/ansible.cfg =====
+[defaults]
+inventory = inventory/local.yml
+roles_path = roles
+host_key_checking = False
+retry_files_enabled = False
+interpreter_python = auto_silent
+
+ansible/inventory/local.yml
+
+===== FILE: ansible/inventory/local.yml =====
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+
+ansible/playbooks/bootstrap.yml
+
+===== FILE: ansible/playbooks/bootstrap.yml =====
+- name: Bootstrap a local node for dev operations
+  hosts: localhost
+  become: true
+  vars:
+    podman_user: "podman_user" #populate. For the common role task
+  roles:
+    - common
+    - podman
+    - kube-tools
+    - observability-dirs
+    - grafana
+    - prometheus
+    - loki
