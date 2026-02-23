@@ -5,9 +5,9 @@
   vars:
     podman_user: "podman_user" #populate. For the common role task
   roles:
-    - common
-    - kubeadm-common
     - podman
+#   - kubeadm-common
+    - common
     - kube-tools
     - minikube
 #   - kubeadm-common

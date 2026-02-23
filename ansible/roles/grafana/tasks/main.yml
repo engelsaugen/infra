@@ -1,15 +1,15 @@
-- name: Pull Grafana image
-  podman_image:
+- name: pull grafana image
+  containers.podman.podman_image:
     name: grafana/grafana
     tag: latest
     state: present
 
-- name: Run Grafana
-  podman_container:
+- name: run grafana
+  containers.podman.podman_container:
     name: grafana
     image: grafana/grafana:latest
     state: started
-    restart: always
+    restart_policy: always
     ports:
       - "3000:3000"
     volumes:

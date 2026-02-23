@@ -1,56 +1,41 @@
-- name: Create base observability directory
-  file:
-    path: /opt/observability
+- name: create observability directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
     state: directory
-    mode: '0755'
+    mode: "{{ item.mode | default('0755') }}"
     owner: root
     group: root
+  loop:
+    # Base
+    - { path: /opt/observability }
 
-- name: Create Prometheus data dir
-  file:
-    path: /opt/observability/prometheus
-    state: directory
-    mode: '0755'
-    owner: root
-    group: root
-  
-- name: Create config subdir for prometheus
-  file:
-    path: /opt/observability/prometheus/config
-    state: directory
-    mode: '0755'
-    owner: root
-    group: root
+    # Prometheus
+    - { path: /opt/observability/prometheus }
+    - { path: /opt/observability/prometheus/data }
+    - { path: /opt/observability/prometheus/config }
 
-- name: Create Grafana data dir
-  file:
-    path: /opt/observability/grafana
-    state: directory
-    mode: '0775'
-    owner: root
-    group: root
-    
-- name: Create provisioning subdir for grafana
-  file:
-    path: /opt/observability/grafana/provisioning
-    state: directory
-    mode: '0755'
-    owner: root
-    group: root
+    # Grafana
+    - { path: /opt/observability/grafana }
+    - { path: /opt/observability/grafana/data, mode: '0775' }
+    - { path: /opt/observability/grafana/provisioning }
+    - { path: /opt/observability/grafana/provisioning/datasources }
 
-- name: Create provisioning/datasources subdir for grafana
-  file:
-    path: /opt/observability/grafana/provisioning/datasources
-    state: directory
-    mode: '0755'
-    owner: root
-    group: root
+    # Loki
+    - { path: /opt/observability/loki }
 
-- name: Create Loki data dir
-  file:
-    path: /opt/observability/loki
-    state: directory
-    mode: '0755'
+- name: create default Prometheus config file
+  ansible.builtin.copy:
+    dest: /opt/observability/prometheus/config/prometheus.yml
+    mode: '0644'
     owner: root
     group: root
+    content: |
+      global:
+        scrape_interval: 15s
+
+      scrape_configs:
+        - job_name: 'prometheus'
+          static_configs:
+            - targets: ['localhost:9090']
+  become: true
 

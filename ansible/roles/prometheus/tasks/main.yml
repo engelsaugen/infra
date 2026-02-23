@@ -1,15 +1,15 @@
-- name: Pull Prometheus container
-  podman_image:
-    name: prom/prometheus
+- name: pull prometheus container
+  containers.podman.podman_image:
+    name: docker.io/prom/prometheus
     tag: latest
     state: present
 
-- name: Run Prometheus
-  podman_container:
+- name: run prometheus
+  containers.podman.podman_container:
     name: prometheus
-    image: prom/prometheus:latest
+    image: docker.io/prom/prometheus:latest
     state: started
-    restart: always
+    restart_policy: always
     ports:
       - "9090:9090"
     volumes:

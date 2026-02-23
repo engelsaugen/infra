@@ -1,15 +1,15 @@
-- name: Pull Loki image
-  podman_image:
+- name: pull Loki image
+  containers.podman.podman_image:
     name: grafana/loki
     tag: latest
     state: present
 
 - name: run loki container
-  podman_container:
+  containers.podman.podman_container:
     name: loki
     image: grafana/loki:latest
     state: started
-    restart: always
+    restart_policy: always
     ports:
       - "3100:3100"
     volumes:

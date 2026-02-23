@@ -33,9 +33,11 @@
 
 - name: load the overlay module now (since the one above will need a restart)
   community.general.modprobe:
-    name: overlay 
-    name: br_netfilter
+    name: "{{ item }}"
     state: present
+  loop:
+    - overlay
+    - br_netfilter
 
 - name: apply sysctl params for kubernetes networking
   ansible.builtin.copy:

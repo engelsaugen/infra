@@ -14,7 +14,6 @@
     dest: /tmp
     remote_src: yes
     creates: "/usr/local/bin/helm"  
-    extra_opts: [--strip-components=1]
   become: true
 
 - name: put helm binary into bin so it becomes usable too

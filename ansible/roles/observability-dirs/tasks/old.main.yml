@@ -1,0 +1,74 @@
+#tired of tweaking this one. Tossing it into a new one.
+
+- name: create base observability directory
+  file:
+    path: /opt/observability
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create prometheus dir
+  file:
+    path: /opt/observability/prometheus
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: create prometheus data dir
+  file:
+    path: /opt/observability/prometheus/data
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: create config subdir for prometheus
+  file:
+    path: /opt/observability/prometheus/config
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: create grafana dir
+  file:
+    path: /opt/observability/grafana/data
+    state: directory
+    mode: '0775'
+    owner: root
+    group: root
+
+- name: create Grafana data dir
+  file:
+    path: /opt/observability/grafana/data
+    state: directory
+    mode: '0775'
+    owner: root
+    group: root
+    
+- name: create provisioning subdir for grafana
+  file:
+    path: /opt/observability/grafana/provisioning
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: create provisioning/datasources subdir for grafana
+  file:
+    path: /opt/observability/grafana/provisioning/datasources
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create Loki data dir
+  file:
+    path: /opt/observability/loki
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
