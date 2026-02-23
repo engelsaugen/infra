@@ -1,13 +1,13 @@
 - name: update apt cache
-# ansible.builtin.package: - swap to anything but apt at your own risk. Here we use apt because we rely on apt-specific flags like update_cache.
+  # ansible.builtin.package: - swap to anything but apt at your own risk. Here we use apt because we rely on apt-specific flags like update_cache.
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
   become: true
 
 - name: make sure basic packages are installed
-# ansible.builtin.package: - same deal. Example is optimised for Debian so will need a few tweaks for other distributions.
-  apt:
+  # ansible.builtin.package: - same deal. Example is optimised for Debian so will need a few tweaks for other distributions.
+  ansible.builtin.apt:
     name:
       - curl
       - wget #for curl purposes but diff
@@ -18,26 +18,26 @@
       - socat #same as iptables. Needed by kube-proxy. Port forwarding and stuff.
       - conntrack #connection trackinng - again kube-proxy
       - iptables #for kubernetes since it relies on iptables binaries
- #    - apt-transport-http - #retro. Uncomment if you're retro
- #    - apt-transport-https - #i.e Debian <10
-     state: present
-     update_cache: true #second time to be safe
+      # - apt-transport-http - #retro. Uncomment if you're retro
+      # - apt-transport-https - #i.e Debian <10
+    state: present
+    update_cache: true #second time to be safe
   become: true
-  
+
 # - name: Remove swap from fstab
-#  ansible.posix.mount:
-#    name: "{{ item }}"
-#    fstype: swap
-#    state: absent
-#  loop: ["none", "swap"]
-#  become: true #replacing this task with a move cavemanish sed task that comments it out using sed 
+#   ansible.posix.mount:
+#     name: "{{ item }}"
+#     fstype: swap
+#     state: absent
+#   loop: ["none", "swap"]
+#   become: true #replacing this task with a move cavemanish sed task that comments it out using sed
 
 - name: enable lingering for the user #needed for rootless podman containers to not kill themselves after logout
   ansible.builtin.command: "loginctl enable-linger {{ podman_user }}"
   args:
     creates: "/var/lib/systemd/linger/{{ podman_user }}" #so it doesnt rerun
   become: true
-# this will break if you dont populate your user in defaults
+  # this will break if you dont populate your user in defaults
 
 - name: verify lingering is active
   ansible.builtin.stat:
@@ -48,5 +48,4 @@
   ansible.builtin.fail:
     msg: "Lingering was not enabled for {{ podman_user }}!"
   when: not linger_check.stat.exists
-#botched user or systemd setup if this hits^
-
+  #botched user or systemd setup if this hits^
