@@ -7,7 +7,7 @@
 
 - name: make sure basic packages are installed
 # ansible.builtin.package: - same deal. Example is optimised for Debian so will need a few tweaks for other distributions.
-    apt:
+  apt:
     name:
       - curl
       - wget #for curl purposes but diff
@@ -20,9 +20,9 @@
       - iptables #for kubernetes since it relies on iptables binaries
  #     - apt-transport-http - #retro. Uncomment if you're retro
  #     - apt-transport-https - #i.e Debian <10
-    state: present
-    update_cache: true #second time to be safe
-    
+     state: present
+     update_cache: true #second time to be safe
+  become: true
   
 # - name: Remove swap from fstab
 #  ansible.posix.mount:
