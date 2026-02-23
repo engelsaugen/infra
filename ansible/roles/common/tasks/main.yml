@@ -18,8 +18,8 @@
       - socat #same as iptables. Needed by kube-proxy. Port forwarding and stuff.
       - conntrack #connection trackinng - again kube-proxy
       - iptables #for kubernetes since it relies on iptables binaries
- #     - apt-transport-http - #retro. Uncomment if you're retro
- #     - apt-transport-https - #i.e Debian <10
+ #    - apt-transport-http - #retro. Uncomment if you're retro
+ #    - apt-transport-https - #i.e Debian <10
      state: present
      update_cache: true #second time to be safe
   become: true
