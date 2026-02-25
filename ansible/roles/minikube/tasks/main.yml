@@ -9,3 +9,16 @@
   args:
     creates: "{{ ansible_env.HOME }}/.minikube"
 
+#- name: start minikube with podman driver
+#  ansible.builtin.command: minikube start --driver=podman --force
+#  become: true
+
+
+#- name: start minikube with podman driver
+#  ansible.builtin.command: minikube start --driver=podman --force
+#  args:
+#    creates: "/root/.minikube/profiles/minikube"
+#  become: true
+
+
+
