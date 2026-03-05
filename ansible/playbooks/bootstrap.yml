@@ -17,5 +17,5 @@
     - grafana
     - prometheus
     - loki
-   - argo
+    - argo
  
