@@ -24,6 +24,7 @@
     remote_src: yes
   become: true
 
-
+  
   #kube & helm both wait for their version variables to be populated in kube-tools/defaults/main.yml
   #hopefully the force:no will serve the same function as what im doing below for helm - not reinstall what already exists
+  #in case you mess up one of the following tasks, this one cannot be repeated unless you remove helm from local/bin
