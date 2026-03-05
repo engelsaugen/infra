@@ -4,21 +4,21 @@
     state: present
   become: true
 
-- name: start minikube with podman driver
-  ansible.builtin.command: minikube start --driver=podman
-  args:
-    creates: "{{ ansible_env.HOME }}/.minikube"
+#ansible will end up creating /root/.minikube as part of the deb installation
+#thus breaking the whole sequence. It will look /profiles, get split brain and orchestrate everything using podman (cursed)
 
 #- name: start minikube with podman driver
-#  ansible.builtin.command: minikube start --driver=podman --force
-#  become: true
-
-
-#- name: start minikube with podman driver
-#  ansible.builtin.command: minikube start --driver=podman --force
+#  ansible.builtin.command: minikube start --driver=podman
 #  args:
-#    creates: "/root/.minikube/profiles/minikube"
+#    creates: "{{ ansible_env.HOME }}/.minikube"
+
+#- name: start minikube with podman driver
+#  ansible.builtin.command: minikube start --driver=podman --force
 #  become: true
 
 
-
+- name: start minikube with podman driver
+  ansible.builtin.command: minikube start --driver=podman --force
+  args:
+    creates: "/root/.minikube/profiles/minikube"
+  become: true
