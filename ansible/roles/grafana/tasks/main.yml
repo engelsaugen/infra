@@ -1,17 +1,33 @@
-- name: pull grafana image
-  containers.podman.podman_image:
-    name: grafana/grafana
-    tag: latest
+#- name: pull grafana image
+#  containers.podman.podman_image:
+#    name: grafana/grafana
+#   tag: latest
+#    state: present
+
+#- name: run grafana
+#  containers.podman.podman_container:
+#    name: grafana
+#    image: grafana/grafana:latest
+#    state: started
+#    restart_policy: always
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - /opt/observability/grafana:/var/lib/grafana
+
+#^botched^. Or not. Use if you want a separate grafana under podman.
+
+#one off task for grafana, and the whole stack since they will all live in the monitoring ns
+- name: ensure monitoring namespace exists #
+  kubernetes.core.k8s:
     state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: monitoring
 
-- name: run grafana
-  containers.podman.podman_container:
-    name: grafana
-    image: grafana/grafana:latest
-    state: started
-    restart_policy: always
-    ports:
-      - "3000:3000"
-    volumes:
-      - /opt/observability/grafana:/var/lib/grafana
-
+- name: apply kube manifests
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ playbook_dir }}/../monitoring/grafana/"
