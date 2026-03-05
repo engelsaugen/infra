@@ -1,5 +1,4 @@
 #  (longshot) install argo so the app manifest can run
-
 - name: argo namespace
   ansible.builtin.command: kubectl create namespace argocd
   register: ns_result
@@ -11,7 +10,7 @@
     kubectl apply -n argocd
     -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
- - name: expose argo via nodeport
+- name: expose argo via nodeport
   kubernetes.core.k8s:
     state: patched
     kind: Service
@@ -22,13 +21,7 @@
         type: NodePort
   
 #- name: expose argo via nodeport #chatgpt alternative
-    ansible.builtin.command: >
-      kubectl patch svc argocd-server -n argocd \
-      -p '{"spec": {"type": "NodePort"}}
-    failed_when: false
-
-  
-
-
--
-
+#  ansible.builtin.command: >
+#    kubectl patch svc argocd-server -n argocd \
+#    -p '{"spec": {"type": "NodePort"}}
+#  failed_when: false
