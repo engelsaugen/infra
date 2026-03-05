@@ -14,7 +14,8 @@
 #   - kubeadm-master
 #   - kubeadm-worker
     - observability-dirs
-    - argo
     - grafana
     - prometheus
     - loki
+   - argo
+ 
