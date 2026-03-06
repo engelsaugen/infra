@@ -27,7 +27,23 @@
       metadata:
         name: monitoring
 
-- name: apply kube manifests
+#- name: apply kube manifests
+#  kubernetes.core.k8s:
+#    state: present
+#    src: "{{ playbook_dir }}/../../monitoring/grafana/"
+#
+
+- name: apply grafana datasource
   kubernetes.core.k8s:
     state: present
-    src: "{{ playbook_dir }}/../../monitoring/grafana/"
+    src: "{{ grafana_manifest_dir }}/datasource.yaml"
+
+- name: apply grafana deployment
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ grafana_manifest_dir }}/deployment.yaml"
+
+- name: apply grafana service
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ grafana_manifest_dir }}/service.yaml"

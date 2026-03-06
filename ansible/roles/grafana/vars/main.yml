@@ -1,0 +1,1 @@
+grafana_manifest_dir: "{{ playbook_dir }}/../../monitoring/grafana"
