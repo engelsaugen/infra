@@ -1,5 +1,6 @@
-#this role turned out a real bummer so dividing tasks into 2 - crds first (annotations blow up) and argo itself later,
+#this role turned out a real bummer so separating tasks into 2 - crds first (annotations blow up) and argo itself later,
 #as well as adding wait clauses (registering crds took time and ansible applied on top, making a real mess)
+#^originally. Supposedly. Separation (url) blows up too. Adding them together with corresponding wait clauses.
 
 - name: ensure argocd namespace exists
   kubernetes.core.k8s:
@@ -10,10 +11,14 @@
       metadata:
         name: argocd
 
-- name: install argocd CRDs
+- name: install argocd
   ansible.builtin.command: >
-    kubectl apply
-    -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/crds.yaml
+    kubectl apply -n argocd
+    -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+  register: argo_install
+  failed_when: >
+    argo_install.rc != 0 and
+    "AlreadyExists" not in argo_install.stderr
 
 - name: wait for argocd CRDs
   ansible.builtin.command: kubectl get crd applications.argoproj.io
@@ -21,15 +26,6 @@
   until: crd_check.rc == 0
   retries: 20
   delay: 3
-
-- name: install argocd core
-  ansible.builtin.command: >
-    kubectl apply -n argocd
-    -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-  register: argo_install
-  failed_when: >
-    argo_install.rc != 0 and
-    "metadata.annotations: Too long" not in argo_install.stderr
 
 - name: wait for argocd server deployment
   kubernetes.core.k8s_info:
@@ -50,3 +46,7 @@
     definition:
       spec:
         type: NodePort
+
+
+
+
