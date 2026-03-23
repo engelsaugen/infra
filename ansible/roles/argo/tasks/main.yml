@@ -1,16 +1,47 @@
-#  (longshot) install argo so the app manifest can run
-- name: argo namespace
-  ansible.builtin.command: kubectl create namespace argocd
-  register: ns_result
-  failed_when: false
-  changed_when: "'created' in ns_result.stdout"
+#this role turned out a real bummer so dividing tasks into 2 - crds first (annotations blow up) and argo itself later,
+#as well as adding wait clauses (registering crds took time and ansible applied on top, making a real mess)
 
-- name: install argo & co
+- name: ensure argocd namespace exists
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: argocd
+
+- name: install argocd CRDs
+  ansible.builtin.command: >
+    kubectl apply
+    -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/crds.yaml
+
+- name: wait for argocd CRDs
+  ansible.builtin.command: kubectl get crd applications.argoproj.io
+  register: crd_check
+  until: crd_check.rc == 0
+  retries: 20
+  delay: 3
+
+- name: install argocd core
   ansible.builtin.command: >
     kubectl apply -n argocd
     -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+  register: argo_install
+  failed_when: >
+    argo_install.rc != 0 and
+    "metadata.annotations: Too long" not in argo_install.stderr
 
-- name: expose argo via nodeport
+- name: wait for argocd server deployment
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: argocd
+    name: argocd-server
+  register: result
+  until: result.resources[0].status.readyReplicas is defined and result.resources[0].status.readyReplicas > 0
+  retries: 30
+  delay: 10
+
+- name: expose argocd via nodeport
   kubernetes.core.k8s:
     state: patched
     kind: Service
@@ -19,9 +50,3 @@
     definition:
       spec:
         type: NodePort
-  
-#- name: expose argo via nodeport #chatgpt alternative
-#  ansible.builtin.command: >
-#    kubectl patch svc argocd-server -n argocd \
-#    -p '{"spec": {"type": "NodePort"}}
-#  failed_when: false
