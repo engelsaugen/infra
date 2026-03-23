@@ -1,6 +1,9 @@
 #this role turned out a real bummer so separating tasks into 2 - crds first (annotations blow up) and argo itself later,
 #as well as adding wait clauses (registering crds took time and ansible applied on top, making a real mess)
 #^originally. Supposedly. Separation (url) blows up too. Adding them together with corresponding wait clauses.
+#further mess with the crd blob being too large, so failing despite everything being installed.
+#adding a clause to CHECK if it's already there before it acts.
+#and an optional one to simply ignore the "error"
 
 - name: ensure argocd namespace exists
   kubernetes.core.k8s:
@@ -11,23 +14,42 @@
       metadata:
         name: argocd
 
+- name: check if argocd server exists
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: argocd
+    name: argocd-server
+  register: argocd_check
+  failed_when: false
+
 - name: install argocd
   ansible.builtin.command: >
     kubectl apply -n argocd
     -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   register: argo_install
+  when: argocd_check.resources | length == 0
   failed_when: >
     argo_install.rc != 0 and
     "AlreadyExists" not in argo_install.stderr
 
-- name: wait for argocd CRDs
+# - name: install argocd - the one that always apply and tolerates CRD noise (the ignoring one)
+#   ansible.builtin.command: >
+#     kubectl apply -n argocd
+#     -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+#   register: argo_install
+#   failed_when: >
+#     argo_install.rc != 0 and
+#     "Too long" not in argo_install.stderr
+
+- name: wait for argocd CRDs (only if just installed [through the when clause])
   ansible.builtin.command: kubectl get crd applications.argoproj.io
   register: crd_check
   until: crd_check.rc == 0
   retries: 20
   delay: 3
+  when: argocd_check.resources | length == 0
 
-- name: wait for argocd server deployment
+- name: wait for argocd server deployment (same wait clause)
   kubernetes.core.k8s_info:
     kind: Deployment
     namespace: argocd
@@ -36,6 +58,7 @@
   until: result.resources[0].status.readyReplicas is defined and result.resources[0].status.readyReplicas > 0
   retries: 30
   delay: 10
+  when: argocd_check.resources | length == 0
 
 - name: expose argocd via nodeport
   kubernetes.core.k8s:
@@ -46,7 +69,3 @@
     definition:
       spec:
         type: NodePort
-
-
-
-
