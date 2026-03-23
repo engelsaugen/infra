@@ -20,7 +20,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: myapp
-          image: ghcr.io/engelsaugen/infra-app:ecfe6a67d3e5ddfc992093a7bf540585cb80febc
+          image: ghcr.io/engelsaugen/infra-app:bca5baed26eaa9679fa8ea79b69a3c7e1c374ac8
           ports:
             - containerPort: 8080
           readinessProbe:
