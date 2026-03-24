@@ -60,7 +60,8 @@
   delay: 10
   when: argocd_check.resources | length == 0
 
-- name: expose argocd via nodeport
+#this used to be a nodeport :)))
+- name: ensure argocd-server is ClusterIP (not nodeport)
   kubernetes.core.k8s:
     state: patched
     kind: Service
@@ -68,7 +69,7 @@
     name: argocd-server
     definition:
       spec:
-        type: NodePort
+        type: ClusterIP
 
 - name: CLI :)))))
   ansible.builtin.get_url:
