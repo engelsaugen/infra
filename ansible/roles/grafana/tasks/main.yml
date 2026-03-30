@@ -18,6 +18,23 @@
 #^botched^. Or not. Use if you want a separate grafana under podman.
 
 #one off task for grafana, and the whole stack since they will all live in the monitoring ns
+
+- name: Ensure pip is installed
+  apt:
+    name: python3-pip
+    state: present
+    update_cache: yes
+  become: true
+  
+#need the kubernetes library in python
+#need pip for it as apt doesnt have it :)))))))))
+
+- name: Install kubernetes Python package
+  pip:
+    name: kubernetes
+    executable: pip3
+  become: true
+  
 - name: ensure monitoring namespace exists #
   kubernetes.core.k8s:
     state: present
