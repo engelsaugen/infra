@@ -19,6 +19,26 @@
 
 #one off task for grafana, and the whole stack since they will all live in the monitoring ns
 
+- name: Install venv
+  apt:
+    name: python3-venv
+    state: present
+  become: true
+
+- name: Create venv
+  command: python3 -m venv /opt/ansible-venv
+  args:
+    creates: /opt/ansible-venv
+
+- name: Install kubernetes in venv
+  pip:
+    name: kubernetes
+    virtualenv: /opt/ansible-venv
+
+- name: Use venv python
+  set_fact:
+    ansible_python_interpreter: /opt/ansible-venv/bin/python
+
 - name: Ensure pip is installed
   apt:
     name: python3-pip
@@ -27,13 +47,8 @@
   become: true
   
 #need the kubernetes library in python
-#need pip for it as apt doesnt have it :)))))))))
-
-- name: Install kubernetes Python package
-  pip:
-    name: kubernetes
-    executable: pip3
-  become: true
+#need pip for it as apt doesnt have it :)))))
+#needs to be in a venv cuz it breaks other things :)))))))))
   
 - name: ensure monitoring namespace exists #
   kubernetes.core.k8s:
