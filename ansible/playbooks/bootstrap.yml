@@ -16,6 +16,6 @@
     - observability-dirs
     - grafana
     - prometheus
-    - loki
+#   - loki
     - argo
  

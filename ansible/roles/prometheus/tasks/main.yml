@@ -1,19 +1,46 @@
-- name: pull prometheus container
-  containers.podman.podman_image:
-    name: docker.io/prom/prometheus
-    tag: latest
+#- name: pull prometheus container
+#  containers.podman.podman_image:
+#    name: docker.io/prom/prometheus
+#    tag: latest
+#    state: present
+
+#- name: run prometheus
+#  containers.podman.podman_container:
+#    name: prometheus
+#    image: docker.io/prom/prometheus:latest
+#    state: started
+#    restart_policy: always
+#    ports:
+#      - "9090:9090"
+#    volumes:
+#      - /opt/observability/prometheus/data:/prometheus
+#      - /opt/observability/prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml
+
+- name: ensure monitoring namespace exists
+  kubernetes.core.k8s:
     state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: monitoring
 
-- name: run prometheus
-  containers.podman.podman_container:
-    name: prometheus
-    image: docker.io/prom/prometheus:latest
-    state: started
-    restart_policy: always
-    ports:
-      - "9090:9090"
-    volumes:
-      - /opt/observability/prometheus/data:/prometheus
-      - /opt/observability/prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml
+- name: apply prometheus config map
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ prometheus_manifest_dir }}/config-map.yaml"
 
+- name: apply prometheus rbac
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ prometheus_manifest_dir }}/rbac.yaml"
 
+- name: apply prometheus deployment
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ prometheus_manifest_dir }}/deployment.yaml"
+
+- name: apply prometheus service
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ prometheus_manifest_dir }}/service.yaml"

@@ -1,26 +1,50 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: myapp
+  name: prometheus
+  namespace: monitoring
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: myapp
+      app: prometheus
   template:
     metadata:
       labels:
-        app: myapp
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
-        prometheus.io/path: "/metrics"
+        app: prometheus
     spec:
-      imagePullSecrets:
-        - name: ghcr-secret
-      containers:
-        - name: myapp
-          image: ghcr.io/engelsaugen/infra-app:c3086901bb216fd72d274b1d7f38e73274f6098a
-          ports:
-            - containerPort: 8080
+      serviceAccountName: prometheus
 
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.49.1
+
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--storage.tsdb.retention.time=24h"
+
+          ports:
+            - containerPort: 9090
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+            - name: data
+              mountPath: /prometheus
+
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+
+        - name: data
+          emptyDir: {}
